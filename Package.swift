@@ -31,6 +31,7 @@ let package = Package(
             name: "VouchBoxCLI",
             dependencies: [
                 "InstallKit",
+                "ManifestKit",
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
             ]
         ),

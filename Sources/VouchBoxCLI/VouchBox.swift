@@ -12,6 +12,7 @@ struct VouchBox: AsyncParsableCommand {
             UninstallCommand.self,
             ListCommand.self,
             HelperCommand.self,
+            SignManifestCommand.self,
         ]
     )
 }
