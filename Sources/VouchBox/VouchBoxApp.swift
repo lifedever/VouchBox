@@ -2,6 +2,7 @@ import SwiftUI
 
 @main
 struct VouchBoxApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @State private var catalog = AppCatalog()
     @State private var helper = HelperStatusModel()
 

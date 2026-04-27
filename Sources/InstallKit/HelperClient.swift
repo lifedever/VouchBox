@@ -61,11 +61,13 @@ public actor HelperClient {
         }
     }
 
+    /// Fire-and-forget shutdown: helper will exit(0) after sending reply.
+    /// We don't await the reply because helper may exit before reply is delivered,
+    /// leaving the continuation hanging.
     public func shutdown() async {
         guard let p = try? proxy() else { return }
-        await withCheckedContinuation { (cont: CheckedContinuation<Void, Never>) in
-            p.shutdown { cont.resume() }
-        }
+        p.shutdown { /* helper may have exited before this fires */ }
+        try? await Task.sleep(nanoseconds: 250_000_000)
     }
 
     public func resignInPlace(path: String, bundleID: String) async throws {

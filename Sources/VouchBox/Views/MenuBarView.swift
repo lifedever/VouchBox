@@ -91,12 +91,7 @@ struct MenuBarView: View {
                 openWindow(id: "main")
             }
             ActionRow(title: "立即检查更新") { Task { await catalog.refreshAll() } }
-            ActionRow(title: "退出 VouchBox") {
-                Task {
-                    await HelperClient().shutdown()
-                    await MainActor.run { NSApp.terminate(nil) }
-                }
-            }
+            ActionRow(title: "退出 VouchBox") { NSApp.terminate(nil) }
         }
         .padding(.vertical, 4)
     }
