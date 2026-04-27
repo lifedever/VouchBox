@@ -7,6 +7,8 @@ struct MainWindow: View {
     @State private var selection: ManifestEntry.ID?
     @State private var showAddSheet = false
     @State private var showHelperOnboarding = false
+    @State private var bootstrap = BootstrapCoordinator()
+    @State private var showBootstrap = false
 
     var body: some View {
         NavigationSplitView {
@@ -41,10 +43,16 @@ struct MainWindow: View {
         .sheet(isPresented: $showHelperOnboarding) {
             HelperOnboardingView(helper: helper)
         }
+        .sheet(isPresented: $showBootstrap) {
+            BootstrapSheet(coordinator: bootstrap)
+        }
         .task {
+            await bootstrap.checkAtLaunch()
             await helper.refresh()
             if helper.status != .enabled {
                 showHelperOnboarding = true
+            } else if bootstrap.state == .needsBootstrap {
+                showBootstrap = true
             }
             await catalog.refreshAll()
         }
