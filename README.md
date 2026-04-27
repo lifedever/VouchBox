@@ -1,76 +1,88 @@
 # VouchBox
 
-> 一个开源的 macOS App 本地分发管理器，为没有 Apple Developer ID 的独立 App 提供"更新后保留系统授权"的能力。
+**English** | [简体中文](README.zh.md)
 
-类似 JetBrains Toolbox：集中管理你装的工具、看更新、一键升级、一键卸载。
-**与 Toolbox 的差异**：VouchBox 在用户机器上充当本地"签名担保人"（Vouch），让无 Developer ID（$99/年）的 App 也能在更新后保留 TCC 授权（辅助功能、屏幕录制、麦克风等），不用每次升级都重新到"系统设置 → 隐私"里点同意。
+> An open-source local distribution manager for macOS apps, giving indie apps without an Apple Developer ID the ability to **preserve system permissions across updates**.
 
-## 状态
+Think of it as JetBrains Toolbox for indie macOS apps: install, update, uninstall — all in one place.
+**What sets VouchBox apart**: it acts as a local *signing vouch* on the user's machine, so that apps without a Developer ID ($99/year) can keep their TCC permissions (Accessibility, Screen Recording, Microphone, etc.) after every update — no need to re-grant in System Settings → Privacy & Security each time.
 
-🚧 设计阶段。详见 [`docs/design.md`](docs/design.md)。
+## Status
 
-## 解决什么问题
+🚧 Early development. P1–P3 implemented; P4 (Memo series onboarding) deferred. See [`docs/design.md`](docs/design.md) for the full architecture.
 
-独立开发者不交 $99/年就拿不到 Developer ID 证书，发布的 macOS App 只能 ad-hoc 签名。后果：
+## What problem does this solve?
 
-1. **每次更新都要重新授权系统权限**（cdhash 变了 → TCC 当作新 App）
-2. **Gatekeeper 拦截首次启动**（quarantine 标记）
-3. **每个 App 自己造轮子做 in-app updater**，bug 难修复（一旦 updater 自身有 bug，存量用户无法远程救援）
+Indie developers who don't pay $99/year don't get a Developer ID certificate, so their macOS apps can only be ad-hoc signed. The fallout:
 
-VouchBox 把这三个问题在客户端一次性解决。
+1. **Every update requires re-granting system permissions** (cdhash changes → TCC treats it as a brand new app)
+2. **Gatekeeper blocks first launch** (quarantine attribute)
+3. **Each app reinvents its own in-app updater**, and bugs are hard to fix in the field — once the updater itself ships broken, existing users can't be patched remotely
 
-## 核心原理（一句话）
+VouchBox solves all three on the client, once.
 
-通过在重签时把代码签名的 designated requirement 锁死在 bundle ID 而非 cdhash 上，让 TCC 把新旧版本视为同一个 App，授权得以保留。详见 [`docs/design.md`](docs/design.md) §2。
+## Core idea (one line)
 
-## 谁可以接入
+When VouchBox re-signs an app on install/update, it pins the **designated requirement** to the bundle ID rather than the cdhash. macOS's TCC then treats every future update of that app as the *same* app, and your previously granted permissions stick. See [`docs/design.md`](docs/design.md) §2 for the gory details.
 
-VouchBox 的 manifest 协议是公开的（[`docs/manifest-spec.md`](docs/manifest-spec.md)），任何 macOS App 开发者都能用。但本项目本身**只维护 lifedever 自家 App 的内置列表**，不收 PR、不审核第三方 App、不背书。
+## Who can plug into this?
 
-第三方有两条路：
+The manifest protocol is open ([`docs/manifest-spec.md`](docs/manifest-spec.md)) — any macOS developer can write a manifest. **However, this project itself maintains only the lifedever built-in catalog**: no third-party PRs, no third-party app review, no endorsement.
 
-1. **托管 manifest 让用户手动添加**：按 spec 编写 JSON manifest → 托管在 HTTPS URL → 在 App 内加 `VBManaged` flag 关掉自更新 → 用户在 VouchBox 输入 URL 添加。**用户在 UI 看到"⚠ 第三方来源 / 自担风险"警示**。
-2. **fork VouchBox 自己运营**：把内置列表换成自己的 App，发自己品牌的客户端，独立担责。MIT 协议鼓励这么做。
+Third parties have two paths:
 
-> **免责声明**：VouchBox 项目（lifedever 维护版本）只对内置 lifedever 列表中的 App 负责。用户手动添加的第三方 manifest、fork 版本中收录的任何 App，与本项目无关。安装第三方 App 等同于"信任那个开发者本人"——VouchBox 只负责保留你给那个 App 的系统授权，不替开发者背书 App 的内容是否安全。
+1. **Host a manifest, let users add it manually**: write a JSON manifest per spec → host on an HTTPS URL → set the `VBManaged` flag in your app to disable self-update → users paste the URL into VouchBox. **The UI shows a "⚠ Third-party / use at your own risk" warning** for any manually added entry.
+2. **Fork VouchBox and run your own**: replace the built-in catalog with your own apps, ship under your brand, take your own responsibility. The MIT license encourages this.
 
-## 功能（V1 范围）
+> **Disclaimer**: The lifedever-maintained version of VouchBox vouches *only* for apps in its built-in catalog. User-added third-party manifests, and any apps included in fork builds, are **not** the responsibility of this project. Installing a third-party app is equivalent to trusting that developer directly — VouchBox preserves the permissions you grant; it does **not** vet what those apps do with them.
 
-- 📋 **App 列表**：展示所有可装 App，含名称、图标、简介、截图、作者、官网、许可证、大小、最后更新时间
-- ⬇️ **安装**：下载 → 校验 SHA256 → 剥离 quarantine → 重签为 stable DR → 入 `/Applications`
-- 🔄 **更新**：检测新版本 → 差量提示 release notes → 一键升级（保留 TCC 授权）
-- 🗑️ **卸载**：移除 `/Applications` 下的 .app + 可选清理用户数据 + 提示 TCC 残留如何手动清理
-- 🔔 **更新提醒**：定时检查 + 系统通知
-- 🔒 **签名验证**：Ed25519 publisher key 机制（manifest 由 publisher 私钥签名，VouchBox 验证；不强制 publisher 必须签，未签的会显著警示）
-- 🪞 **自管自**：VouchBox 自身也通过同一套 manifest 协议自动更新（首次安装时自动重签自己以保未来 TCC 授权）
+## Features (V1 scope)
 
-## 项目目录
+- 📋 **App catalog** — name, icon, tagline, screenshots, publisher, homepage, license, size, last-updated
+- ⬇️ **Install** — download → SHA256 verify → strip quarantine → re-sign with stable DR → place in `/Applications`
+- 🔄 **Update** — detect new version → show release notes diff → one-click upgrade (TCC preserved)
+- 🗑️ **Uninstall** — remove from `/Applications`, optionally clear user data, with notes on how to manually clean TCC residue
+- 🔔 **Update notifications** — periodic check + system notifications
+- 🔒 **Signature verification** — Ed25519 publisher keys (publishers may sign manifests; unsigned manifests are loudly warned, never silently accepted)
+- 🪞 **Self-management** — VouchBox updates itself through the same manifest protocol; on first launch it re-signs itself with a stable DR so its own future TCC grants are preserved
+
+## Architecture & build
+
+Pure Swift Package, no Xcode project. Targets:
 
 ```
 VouchBox/
-├── README.md
-├── CLAUDE.md             # AI 会话上下文（项目背景 / 决策 / 待办）
-├── docs/
-│   ├── design.md         # 设计文档：核心机制、架构、风险、路线图
-│   └── manifest-spec.md  # 第三方接入规范（manifest schema + App 端要求）
-├── Package.swift         # Pure SPM (TBD)
+├── Package.swift
 ├── Sources/
-│   ├── VouchBox/         # App executable (SwiftUI)
-│   ├── SignKit/          # 重签 + DR 管理
-│   ├── ManifestKit/      # manifest 拉取 / 解析 / 缓存 / 校验
-│   └── InstallKit/       # 下载、校验、安装、卸载
+│   ├── VouchBox/         # SwiftUI app (menu bar + main window)
+│   ├── VouchBoxCLI/      # CLI: install / update / list / helper / sign-manifest
+│   ├── VouchBoxHelper/   # Privileged helper (root) — XPC, writes /Applications
+│   ├── VouchBoxCore/     # Shared types: Manifest, AppState, errors
+│   ├── SignKit/          # codesign wrapper + DR helpers
+│   ├── ManifestKit/      # fetch / parse / cache / Ed25519 verify
+│   ├── InstallKit/       # download / SHA256 / unzip / coordinator
+│   └── HelperProtocol/   # XPC interface
 ├── Tests/
 └── scripts/
-    ├── build-dev.sh
-    └── build-release.sh
+    ├── build-dev.sh      # builds .app, signs main + helper with stable DR
+    └── ...
 ```
 
-## 许可证
+Build a development bundle:
 
-**MIT**。详见正式开 repo 后的 `LICENSE` 文件。
+```bash
+./scripts/build-dev.sh
+open .build/debug-bundle/VouchBox.app
+```
 
-欢迎 fork 改造为你自己的 App 管理工具——把内置列表换成你的 App、用你的品牌、独立运营。
+The dev script signs both the main app and the privileged helper with stable designated requirements (`identifier "com.lifedever.vouchbox"` and `identifier "com.lifedever.vouchbox.helper"` respectively), bundles the helper into `Contents/MacOS/`, and registers the LaunchDaemon plist into `Contents/Library/LaunchDaemons/`.
 
-## 作者
+## License
 
-[lifedever](https://github.com/lifedever) (lifedever)。本项目源于维护 Memo 系列 macOS App 时的实际痛点。
+**MIT** — see `LICENSE`.
+
+Forks are welcome — repackage as your own app management tool with your own catalog, your own brand, your own responsibility.
+
+## Author
+
+[lifedever](https://github.com/lifedever) (lifedever). Born out of real friction maintaining the Memo series of macOS apps.
