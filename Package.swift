@@ -6,6 +6,7 @@ let package = Package(
     platforms: [.macOS(.v14)],
     products: [
         .executable(name: "vouchbox", targets: ["VouchBoxCLI"]),
+        .executable(name: "VouchBoxApp", targets: ["VouchBox"]),
         .executable(name: "com.lifedever.vouchbox.helper", targets: ["VouchBoxHelper"]),
         .library(name: "VouchBoxCore", targets: ["VouchBoxCore"]),
         .library(name: "SignKit", targets: ["SignKit"]),
@@ -34,6 +35,10 @@ let package = Package(
                 "ManifestKit",
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
             ]
+        ),
+        .executableTarget(
+            name: "VouchBox",
+            dependencies: ["InstallKit", "ManifestKit", "VouchBoxCore"]
         ),
         .testTarget(name: "VouchBoxCoreTests", dependencies: ["VouchBoxCore"]),
         .testTarget(name: "SignKitTests", dependencies: ["SignKit"]),
