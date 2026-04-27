@@ -7,4 +7,5 @@ build/
 *.app
 *.zip
 test-fixtures/*.app/
+test-fixtures/out/
 .vouchbox-test-keys/
