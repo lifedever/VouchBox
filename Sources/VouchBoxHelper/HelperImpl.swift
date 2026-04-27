@@ -45,6 +45,13 @@ final class HelperImpl: NSObject, VouchBoxHelperProtocol, @unchecked Sendable {
         }
     }
 
+    func shutdown(reply: @escaping () -> Void) {
+        reply()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            exit(0)
+        }
+    }
+
     func resignInPlace(path: String, bundleID: String, reply: @escaping (Error?) -> Void) {
         Task {
             do {

@@ -1,6 +1,7 @@
 import SwiftUI
 import AppKit
 import VouchBoxCore
+import InstallKit
 
 struct MenuBarView: View {
     @Bindable var catalog: AppCatalog
@@ -85,9 +86,17 @@ struct MenuBarView: View {
 
     private var actionSection: some View {
         VStack(spacing: 0) {
-            ActionRow(title: "打开主窗口") { openWindow(id: "main") }
+            ActionRow(title: "打开主窗口") {
+                NSApp.activate(ignoringOtherApps: true)
+                openWindow(id: "main")
+            }
             ActionRow(title: "立即检查更新") { Task { await catalog.refreshAll() } }
-            ActionRow(title: "退出 VouchBox") { NSApplication.shared.terminate(nil) }
+            ActionRow(title: "退出 VouchBox") {
+                Task {
+                    await HelperClient().shutdown()
+                    await MainActor.run { NSApp.terminate(nil) }
+                }
+            }
         }
         .padding(.vertical, 4)
     }

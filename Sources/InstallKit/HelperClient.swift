@@ -61,6 +61,13 @@ public actor HelperClient {
         }
     }
 
+    public func shutdown() async {
+        guard let p = try? proxy() else { return }
+        await withCheckedContinuation { (cont: CheckedContinuation<Void, Never>) in
+            p.shutdown { cont.resume() }
+        }
+    }
+
     public func resignInPlace(path: String, bundleID: String) async throws {
         let p = try proxy()
         try await withCheckedThrowingContinuation { (cont: CheckedContinuation<Void, Error>) in

@@ -6,14 +6,20 @@ struct VouchBoxApp: App {
     @State private var helper = HelperStatusModel()
 
     var body: some Scene {
-        WindowGroup("VouchBox", id: "main") {
+        Window("VouchBox", id: "main") {
             MainWindow(catalog: catalog, helper: helper)
                 .frame(minWidth: 800, minHeight: 500)
         }
         .windowStyle(.titleBar)
+        .commands {
+            CommandGroup(replacing: .newItem) {}
+        }
 
-        MenuBarExtra("VouchBox", systemImage: "shippingbox") {
+        MenuBarExtra {
             MenuBarView(catalog: catalog)
+        } label: {
+            Image(systemName: "shippingbox.fill")
+                .font(.system(size: 18, weight: .regular))
         }
         .menuBarExtraStyle(.window)
     }

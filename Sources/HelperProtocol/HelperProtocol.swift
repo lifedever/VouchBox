@@ -29,4 +29,7 @@ public let helperMachServiceName = "com.lifedever.vouchbox.helper"
         bundleID: String,
         reply: @escaping (Error?) -> Void
     )
+
+    /// Ask the helper to exit. launchd will not relaunch it until next XPC connection.
+    func shutdown(reply: @escaping () -> Void)
 }
