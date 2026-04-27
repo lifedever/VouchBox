@@ -13,6 +13,7 @@ MAIN_BUNDLE_ID="com.lifedever.vouchbox"
 HELPER_BUNDLE_ID="com.lifedever.vouchbox.helper"
 
 echo "==> Building Swift targets ($CONFIG)"
+swift build -c "$CONFIG" --product VouchBoxApp
 swift build -c "$CONFIG" --product vouchbox
 swift build -c "$CONFIG" --product "$HELPER_BUNDLE_ID"
 
@@ -23,7 +24,8 @@ rm -rf "$APP_BUNDLE"
 mkdir -p "$APP_BUNDLE/Contents/MacOS"
 mkdir -p "$APP_BUNDLE/Contents/Library/LaunchDaemons"
 
-cp "$BIN_PATH/vouchbox" "$APP_BUNDLE/Contents/MacOS/VouchBox"
+cp "$BIN_PATH/VouchBoxApp" "$APP_BUNDLE/Contents/MacOS/VouchBox"
+cp "$BIN_PATH/vouchbox" "$APP_BUNDLE/Contents/MacOS/vouchbox"
 cp "$BIN_PATH/$HELPER_BUNDLE_ID" "$APP_BUNDLE/Contents/MacOS/$HELPER_BUNDLE_ID"
 cp "$ROOT/Resources/com.lifedever.vouchbox.helper.plist" "$APP_BUNDLE/Contents/Library/LaunchDaemons/"
 
