@@ -13,6 +13,9 @@ let package = Package(
         .library(name: "InstallKit", targets: ["InstallKit"]),
         .library(name: "HelperProtocol", targets: ["HelperProtocol"]),
     ],
+    dependencies: [
+        .package(url: "https://github.com/apple/swift-argument-parser", from: "1.5.0"),
+    ],
     targets: [
         .target(name: "VouchBoxCore"),
         .target(name: "SignKit", dependencies: ["VouchBoxCore"]),
@@ -24,7 +27,13 @@ let package = Package(
             dependencies: ["VouchBoxCore", "SignKit", "HelperProtocol"],
             swiftSettings: [.swiftLanguageMode(.v5)]
         ),
-        .executableTarget(name: "VouchBoxCLI", dependencies: ["InstallKit"]),
+        .executableTarget(
+            name: "VouchBoxCLI",
+            dependencies: [
+                "InstallKit",
+                .product(name: "ArgumentParser", package: "swift-argument-parser"),
+            ]
+        ),
         .testTarget(name: "VouchBoxCoreTests", dependencies: ["VouchBoxCore"]),
         .testTarget(name: "SignKitTests", dependencies: ["SignKit"]),
         .testTarget(name: "ManifestKitTests", dependencies: ["ManifestKit"]),
