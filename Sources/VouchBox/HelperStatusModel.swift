@@ -16,6 +16,7 @@ public final class HelperStatusModel {
         if status == .enabled {
             do {
                 helperVersion = try await client.ping()
+                lastError = nil
             } catch {
                 helperVersion = nil
                 lastError = String(describing: error)
