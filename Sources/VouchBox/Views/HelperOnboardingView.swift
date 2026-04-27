@@ -30,7 +30,13 @@ struct HelperOnboardingView: View {
                     }
                 }
             case .unknown(let raw):
-                Text("Helper 状态未知 (\(raw))").foregroundStyle(.red)
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Helper 状态：notFound (\(raw))").foregroundStyle(.red)
+                    Text("通常是因为 VouchBox.app 不在 /Applications/ 目录下。请先把 VouchBox.app 拖入 /Applications/，再重新打开。")
+                        .font(.caption).foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Button("仍然尝试启用") { Task { await helper.register() } }
+                }
             }
 
             if let err = helper.lastError {

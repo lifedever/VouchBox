@@ -25,7 +25,7 @@ mkdir -p "$APP_BUNDLE/Contents/MacOS"
 mkdir -p "$APP_BUNDLE/Contents/Library/LaunchDaemons"
 
 cp "$BIN_PATH/VouchBoxApp" "$APP_BUNDLE/Contents/MacOS/VouchBox"
-cp "$BIN_PATH/vouchbox" "$APP_BUNDLE/Contents/MacOS/vouchbox"
+cp "$BIN_PATH/vouchbox" "$APP_BUNDLE/Contents/MacOS/vouchbox-cli"
 cp "$BIN_PATH/$HELPER_BUNDLE_ID" "$APP_BUNDLE/Contents/MacOS/$HELPER_BUNDLE_ID"
 cp "$ROOT/Resources/com.lifedever.vouchbox.helper.plist" "$APP_BUNDLE/Contents/Library/LaunchDaemons/"
 
@@ -50,6 +50,8 @@ cat > "$APP_BUNDLE/Contents/Info.plist" <<EOF
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
     <key>CFBundleIdentifier</key>
     <string>$MAIN_BUNDLE_ID</string>
     <key>CFBundleExecutable</key>
