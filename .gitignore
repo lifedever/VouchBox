@@ -1,0 +1,10 @@
+.build/
+.swiftpm/
+*.xcodeproj
+.DS_Store
+DerivedData/
+build/
+*.app
+*.zip
+test-fixtures/*.app/
+.vouchbox-test-keys/
