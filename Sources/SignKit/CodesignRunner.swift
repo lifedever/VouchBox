@@ -46,7 +46,8 @@ public actor CodesignRunner {
             executable: "/usr/bin/codesign",
             args: ["-d", "-r-", bundle.path]
         )
-        let drLine = drResult.stderr
+        let drCombined = drResult.stdout + "\n" + drResult.stderr
+        let drLine = drCombined
             .split(separator: "\n")
             .first { $0.contains("designated =>") }
             .map(String.init) ?? ""

@@ -44,5 +44,6 @@ let package = Package(
         .testTarget(name: "SignKitTests", dependencies: ["SignKit"]),
         .testTarget(name: "ManifestKitTests", dependencies: ["ManifestKit"]),
         .testTarget(name: "InstallKitTests", dependencies: ["InstallKit"]),
+        .testTarget(name: "VouchBoxTests", dependencies: ["VouchBox", "SignKit"]),
     ]
 )
