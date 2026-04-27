@@ -19,7 +19,11 @@ let package = Package(
         .target(name: "ManifestKit", dependencies: ["VouchBoxCore"]),
         .target(name: "HelperProtocol", dependencies: ["VouchBoxCore"]),
         .target(name: "InstallKit", dependencies: ["VouchBoxCore", "SignKit", "ManifestKit", "HelperProtocol"]),
-        .executableTarget(name: "VouchBoxHelper", dependencies: ["VouchBoxCore", "SignKit", "HelperProtocol"]),
+        .executableTarget(
+            name: "VouchBoxHelper",
+            dependencies: ["VouchBoxCore", "SignKit", "HelperProtocol"],
+            swiftSettings: [.swiftLanguageMode(.v5)]
+        ),
         .executableTarget(name: "VouchBoxCLI", dependencies: ["InstallKit"]),
         .testTarget(name: "VouchBoxCoreTests", dependencies: ["VouchBoxCore"]),
         .testTarget(name: "SignKitTests", dependencies: ["SignKit"]),
