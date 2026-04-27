@@ -29,6 +29,17 @@ cp "$BIN_PATH/vouchbox" "$APP_BUNDLE/Contents/MacOS/vouchbox"
 cp "$BIN_PATH/$HELPER_BUNDLE_ID" "$APP_BUNDLE/Contents/MacOS/$HELPER_BUNDLE_ID"
 cp "$ROOT/Resources/com.lifedever.vouchbox.helper.plist" "$APP_BUNDLE/Contents/Library/LaunchDaemons/"
 
+# Build AppIcon.icns from .appiconset (SPM doesn't run actool for executableTarget)
+mkdir -p "$APP_BUNDLE/Contents/Resources"
+ICONSET_SRC="$ROOT/Resources/AppIcon.appiconset"
+ICONSET_TMP="$BUILD_DIR/AppIcon.iconset"
+rm -rf "$ICONSET_TMP"
+mkdir -p "$ICONSET_TMP"
+for f in "$ICONSET_SRC"/icon_*.png; do
+    cp "$f" "$ICONSET_TMP/$(basename "$f")"
+done
+iconutil -c icns -o "$APP_BUNDLE/Contents/Resources/AppIcon.icns" "$ICONSET_TMP"
+
 # Glob copy SPM resource bundles — never hardcode bundle names (CLAUDE.md global rule §1).
 for bundle in "$BIN_PATH"/*.bundle; do
     [ -d "$bundle" ] && cp -R "$bundle" "$APP_BUNDLE/Contents/" || true
@@ -51,6 +62,10 @@ cat > "$APP_BUNDLE/Contents/Info.plist" <<EOF
     <string>0.1.0</string>
     <key>LSMinimumSystemVersion</key>
     <string>14.0</string>
+    <key>CFBundleIconFile</key>
+    <string>AppIcon</string>
+    <key>CFBundleIconName</key>
+    <string>AppIcon</string>
     <key>SMPrivilegedExecutables</key>
     <dict>
         <key>$HELPER_BUNDLE_ID</key>
