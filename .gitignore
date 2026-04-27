@@ -9,3 +9,6 @@ build/
 test-fixtures/*.app/
 test-fixtures/out/
 .vouchbox-test-keys/
+.claude/
+CLAUDE.md
+docs/superpowers/
